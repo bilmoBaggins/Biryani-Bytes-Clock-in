@@ -3,9 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "ignoreDeprecations": "6.0"
-  }
+    "ignoreDeprecations": "6.0",
+    "lib": ["DOM", "ESNext"]
+  },
+  "include": ["App.tsx", "index.ts", "src/**/*"],
+  "exclude": ["node_modules", "build"]
 }
