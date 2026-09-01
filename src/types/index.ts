@@ -2,6 +2,8 @@ export interface Employee {
   id: number;
   name: string;
   hourlyRate: number;
+  code: string;
+  isClockedIn: boolean;
 }
 
 export interface Shift {

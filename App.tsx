@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-// @ts-ignore
-import { NavigationContainer } from "@react-navigation/native";
-// @ts-ignore
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { ActivityIndicator, View, Text } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { initializeDatabase, closeDatabase } from "./src/database/database";
 import { initializeEmployees } from "./src/database/employees";
 import ClockScreen from "./src/screens/ClockScreen";
@@ -37,49 +35,50 @@ export default function App() {
 
   if (!isReady) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FBF3EC" }}>
         <ActivityIndicator size="large" color="#C62828" />
+        <Text style={{ marginTop: 16, color: "#8A7A70", fontWeight: "600" }}>Loading Biryani Bytes...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ color: "red", fontSize: 16 }}>Error: {error}</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24, backgroundColor: "#FBF3EC" }}>
+        <Text style={{ color: "#C62828", fontSize: 16, fontWeight: "700", textAlign: "center" }}>Something went wrong</Text>
+        <Text style={{ color: "#8A7A70", fontSize: 14, textAlign: "center", marginTop: 6 }}>{error}</Text>
       </View>
     );
   }
 
   return (
     <>
-      {/* @ts-ignore */}
-      <StatusBar />
+      <StatusBar style="dark" />
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={{
             tabBarActiveTintColor: "#C62828",
-            tabBarInactiveTintColor: "#999",
+            tabBarInactiveTintColor: "#B0A6A0",
+            tabBarLabelStyle: { fontSize: 14, fontWeight: "700", marginTop: 0 },
+            tabBarItemStyle: { justifyContent: "center", alignItems: "center" },
+            tabBarIconStyle: { display: "none", width: 0, height: 0, margin: 0 },
             tabBarStyle: {
-              borderTopColor: "#ddd",
-              borderTopWidth: 1,
-              paddingBottom: 8,
+              backgroundColor: "white",
+              borderTopColor: "#F0E7DE",
+              height: 56,
+              paddingBottom: 0,
+              paddingTop: 0,
             },
-            headerStyle: {
-              backgroundColor: "#7C2D12",
-            },
+            headerStyle: { backgroundColor: "#7C2D12" },
             headerTintColor: "white",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
+            headerTitleStyle: { fontWeight: "700" },
           }}
         >
           <Tab.Screen
             name="Clock"
             component={ClockScreen}
             options={{
-              tabBarLabel: "Clock In/Out",
-              tabBarIcon: (props: any) => <TabBarIcon color={props.color} name="🕐" />,
+              tabBarLabel: "Clock",
               headerShown: false,
             }}
           />
@@ -88,7 +87,6 @@ export default function App() {
             component={AdminScreen}
             options={{
               tabBarLabel: "Payroll",
-              tabBarIcon: (props: any) => <TabBarIcon color={props.color} name="📊" />,
               headerShown: false,
             }}
           />
@@ -97,7 +95,3 @@ export default function App() {
     </>
   );
 }
-
-const TabBarIcon = ({ color, name }: { color: string; name: string }) => (
-  <Text style={{ color, fontSize: 20 }}>{name}</Text>
-);

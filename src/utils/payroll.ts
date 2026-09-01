@@ -83,10 +83,10 @@ export async function getAllMonthlyPayroll(
       SUM(
         CASE 
           WHEN clock_out_time IS NOT NULL THEN
-            (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 + 
-             CAST((SUBSTR(clock_in_time, 1, 2)) AS INTEGER) * 60 + 
-             CAST((SUBSTR(clock_out_time, 4, 2)) AS INTEGER)) -
-            (CAST((SUBSTR(clock_in_time, 4, 2)) AS INTEGER))
+            ((CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 + 
+              CAST((SUBSTR(clock_out_time, 4, 2)) AS INTEGER)) -
+             (CAST((SUBSTR(clock_in_time, 1, 2)) AS INTEGER) * 60 + 
+              CAST((SUBSTR(clock_in_time, 4, 2)) AS INTEGER)))
           ELSE 0
         END
       ) / 60.0 as totalHours

@@ -20,21 +20,16 @@ export async function clockInOut(employeeName: string): Promise<{
     hour12: false,
   }); // HH:mm
 
-  // Check if employee has an entry for today
-  const existingShift = await db.getFirstAsync<{
-    id: number;
-    clock_out_time: string | null;
-  }>(
-    "SELECT id, clock_out_time FROM shifts WHERE employee_id = ? AND date = ?",
-    [employee.id, today]
-  );
-
-  if (!existingShift) {
-    // New entry - Clock IN
+  if (!employee.isClockedIn) {
+    // Clock IN - start a new shift row
     await db.runAsync(
       `INSERT INTO shifts (employee_id, employee_name, date, clock_in_time, clock_out_time, hourly_pay)
        VALUES (?, ?, ?, ?, NULL, NULL)`,
       [employee.id, employeeName, today, now]
+    );
+    await db.runAsync(
+      `UPDATE employees SET is_clocked_in = 1 WHERE id = ?`,
+      [employee.id]
     );
     return {
       status: "clockedIn",
@@ -42,47 +37,33 @@ export async function clockInOut(employeeName: string): Promise<{
     };
   }
 
-  if (existingShift.clock_out_time === null) {
-    // Clock OUT and calculate pay
+  // Clock OUT - close the employee's currently open shift and calculate pay
+  const openShift = await db.getFirstAsync<{
+    id: number;
+    clock_in_time: string;
+  }>(
+    `SELECT id, clock_in_time FROM shifts WHERE employee_id = ? AND clock_out_time IS NULL ORDER BY id DESC LIMIT 1`,
+    [employee.id]
+  );
+
+  if (openShift) {
+    const hours = calculateHours(openShift.clock_in_time, now);
+    const pay = hours * employee.hourlyRate;
+
     await db.runAsync(
-      `UPDATE shifts SET clock_out_time = ? WHERE id = ?`,
-      [now, existingShift.id]
+      `UPDATE shifts SET clock_out_time = ?, hourly_pay = ? WHERE id = ?`,
+      [now, pay, openShift.id]
     );
-
-    // Calculate hourly pay
-    const shiftData = await db.getFirstAsync<{
-      clock_in_time: string;
-      clock_out_time: string;
-    }>(
-      `SELECT clock_in_time, clock_out_time FROM shifts WHERE id = ?`,
-      [existingShift.id]
-    );
-
-    if (shiftData) {
-      const hours = calculateHours(shiftData.clock_in_time, now);
-      const pay = hours * employee.hourlyRate;
-
-      await db.runAsync(
-        `UPDATE shifts SET hourly_pay = ? WHERE id = ?`,
-        [pay, existingShift.id]
-      );
-    }
-
-    return {
-      status: "clockedOut",
-      message: `${employeeName} clocked out at ${now}`,
-    };
   }
 
-  // Already clocked out - treat as a new clock in
   await db.runAsync(
-    `INSERT INTO shifts (employee_id, employee_name, date, clock_in_time, clock_out_time, hourly_pay)
-     VALUES (?, ?, ?, ?, NULL, NULL)`,
-    [employee.id, employeeName, today, now]
+    `UPDATE employees SET is_clocked_in = 0 WHERE id = ?`,
+    [employee.id]
   );
+
   return {
-    status: "clockedIn",
-    message: `${employeeName} clocked in at ${now}`,
+    status: "clockedOut",
+    message: `${employeeName} clocked out at ${now}`,
   };
 }
 
@@ -137,21 +118,13 @@ export async function getShiftsByMonth(month: string): Promise<Shift[]> {
 export async function getCurrentStatus(
   employeeName: string
 ): Promise<"clockedIn" | "clockedOut" | "notWorking"> {
-  const db = getDatabase();
-  const today = new Date().toISOString().split("T")[0];
+  const employee = await getEmployeeByName(employeeName);
 
-  const shift = await db.getFirstAsync<{ clock_out_time: string | null }>(
-    `SELECT clock_out_time FROM shifts 
-     WHERE employee_name = ? AND date = ? 
-     ORDER BY clock_in_time DESC LIMIT 1`,
-    [employeeName, today]
-  );
-
-  if (!shift) {
+  if (!employee) {
     return "notWorking";
   }
 
-  return shift.clock_out_time === null ? "clockedIn" : "clockedOut";
+  return employee.isClockedIn ? "clockedIn" : "clockedOut";
 }
 
 function calculateHours(clockInTime: string, clockOutTime: string): number {
