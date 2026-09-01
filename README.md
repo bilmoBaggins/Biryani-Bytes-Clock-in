@@ -71,6 +71,8 @@ index.ts              — Entry point
 - Node.js 18+
 - npm
 - Expo Go app on phone/tablet (iOS/Android)
+- Laptop and phone/tablet connected to the **same Wi-Fi network**
+- Windows Firewall allowing inbound connections on port 8081 (see below)
 
 ### Install & Run
 ```bash
@@ -79,6 +81,12 @@ npx expo start
 ```
 
 Scan the QR code in Expo Go on your device to load the app. The default admin PIN is `1234` — change it from Payroll → Security → Change Admin PIN.
+
+### Windows Firewall (one-time setup)
+Windows Firewall blocks inbound connections on the Metro bundler's port by default, which stops the phone/tablet from downloading the app bundle even when on the same Wi-Fi. Run this once in an **administrator** PowerShell terminal:
+```powershell
+New-NetFirewallRule -DisplayName "Expo 8081" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8081
+```
 
 ## Deploying to a Tablet (Standalone, No Dev Server)
 
