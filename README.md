@@ -137,7 +137,7 @@ The app remains usable without Supabase or internet access. Cloud backup is uplo
 
 - [x] Shift history view per employee
 - [x] Export payroll reports (CSV)
-- [ ] Custom app icon/logo (currently the default Expo template icon — only applies once built as a standalone APK)
+- [x] Custom Biryani Bytes app icon, loading logo, and web favicon
 - [ ] iOS testing (developed/tested primarily on Android)
 - [x] Optional one-tablet database backup/cloud sync
 

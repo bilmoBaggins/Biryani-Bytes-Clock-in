@@ -408,7 +408,7 @@ export default function AdminScreen() {
                     <Text style={styles.detailText}>
                       Clock Out: {shift.clockOutTime}
                     </Text>
-                    {shift.hourlyPay && (
+                    {shift.hourlyPay !== null && (
                       <Text style={styles.payText}>
                         Pay: £{shift.hourlyPay.toFixed(2)}
                       </Text>
