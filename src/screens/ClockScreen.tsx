@@ -133,7 +133,7 @@ export default function ClockScreen() {
       <ScrollView
         contentContainerStyle={styles.container}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#C62828" />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#F28C00" />
         }
       >
         <View style={styles.header}>
@@ -142,7 +142,7 @@ export default function ClockScreen() {
         </View>
 
         {loadingList ? (
-          <ActivityIndicator size="large" color="#C62828" />
+          <ActivityIndicator size="large" color="#F28C00" />
         ) : employees.length === 0 ? (
           <Text style={styles.noData}>No employees have been added yet</Text>
         ) : (
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "800",
     textAlign: "center",
-    color: "#7C2D12",
+    color: "#B85F00",
     letterSpacing: -0.5,
   },
   subtitle: {
@@ -294,10 +294,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   avatarClockedIn: {
-    backgroundColor: "#2E7D32",
+    backgroundColor: "#069B18",
   },
   avatarClockedOut: {
-    backgroundColor: "#7C2D12",
+    backgroundColor: "#F28C00",
   },
   avatarText: {
     color: "white",
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   statusClockedIn: {
-    color: "#2E7D32",
+    color: "#069B18",
   },
   statusClockedOut: {
     color: "#8A7A70",
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#7C2D12",
+    color: "#B85F00",
   },
   modalSubtitle: {
     fontSize: 13,
@@ -364,8 +364,8 @@ const styles = StyleSheet.create({
     color: "#3A2A22",
   },
   pinInputError: {
-    borderColor: "#C62828",
+    borderColor: "#B85F00",
     backgroundColor: "#FDECEA",
-    color: "#C62828",
+    color: "#B85F00",
   },
 });

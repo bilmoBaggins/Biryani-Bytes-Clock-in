@@ -331,7 +331,7 @@ export default function AdminScreen() {
         style={styles.container}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#C62828" />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#F28C00" />
         }
       >
         <Text style={styles.title}>Admin Dashboard</Text>
@@ -349,7 +349,7 @@ export default function AdminScreen() {
           </View>
 
           {loading ? (
-            <ActivityIndicator size="large" color="#C62828" />
+            <ActivityIndicator size="large" color="#F28C00" />
           ) : employees.length === 0 ? (
             <Text style={styles.noData}>No employees</Text>
           ) : (
@@ -431,7 +431,7 @@ export default function AdminScreen() {
             </Pressable>
           </View>
           {loading ? (
-            <ActivityIndicator size="large" color="#C62828" />
+            <ActivityIndicator size="large" color="#F28C00" />
           ) : monthlyData.length === 0 ? (
             <Text style={styles.noData}>No payroll data available</Text>
           ) : (
@@ -616,7 +616,7 @@ export default function AdminScreen() {
               {historyEmployee ? `${historyEmployee.name} - Shift History` : "Shift History"}
             </Text>
             {historyLoading ? (
-              <ActivityIndicator size="large" color="#C62828" />
+              <ActivityIndicator size="large" color="#F28C00" />
             ) : historyShifts.length === 0 ? (
               <Text style={styles.noData}>No shifts recorded</Text>
             ) : (
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: "800",
-    color: "#7C2D12",
+    color: "#B85F00",
     marginBottom: 20,
     marginTop: 16,
     letterSpacing: -0.5,
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#7C2D12",
+    color: "#B85F00",
     marginBottom: 12,
     textTransform: "uppercase",
     letterSpacing: 0.4,
@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
     borderLeftWidth: 4,
-    borderLeftColor: "#7C2D12",
+    borderLeftColor: "#85898C",
     ...shadow,
   },
   shiftHeader: {
@@ -796,11 +796,11 @@ const styles = StyleSheet.create({
   payText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#2E7D32",
+    color: "#069B18",
   },
   activeText: {
     fontSize: 13,
-    color: "#2E7D32",
+    color: "#069B18",
     marginTop: 8,
     fontWeight: "600",
   },
@@ -810,7 +810,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
     borderLeftWidth: 4,
-    borderLeftColor: "#2E7D32",
+    borderLeftColor: "#069B18",
     ...shadow,
   },
   payrollName: {
@@ -838,15 +838,15 @@ const styles = StyleSheet.create({
   payAmount: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#2E7D32",
+    color: "#069B18",
   },
   summaryCard: {
-    backgroundColor: "#7C2D12",
+    backgroundColor: "#F28C00",
     borderRadius: 16,
     padding: 18,
     marginTop: 6,
     ...shadow,
-    shadowColor: "#7C2D12",
+    shadowColor: "#F28C00",
     shadowOpacity: 0.25,
   },
   summaryTitle: {
@@ -885,7 +885,7 @@ const styles = StyleSheet.create({
   outlineButton: {
     backgroundColor: "white",
     borderWidth: 1.5,
-    borderColor: "#7C2D12",
+    borderColor: "#F28C00",
     padding: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -895,12 +895,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#F7F1EC",
   },
   outlineButtonText: {
-    color: "#7C2D12",
+    color: "#B85F00",
     fontSize: 15,
     fontWeight: "700",
   },
   exportButton: {
-    backgroundColor: "#2E7D32",
+    backgroundColor: "#069B18",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 10,
@@ -914,13 +914,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   addButton: {
-    backgroundColor: "#2E7D32",
+    backgroundColor: "#069B18",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
   },
   addButtonPressed: {
-    backgroundColor: "#276A2A",
+    backgroundColor: "#057512",
   },
   addButtonText: {
     color: "white",
@@ -936,7 +936,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderLeftWidth: 4,
-    borderLeftColor: "#7C2D12",
+    borderLeftColor: "#85898C",
     ...shadow,
   },
   employeeInfo: {
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   editBtn: {
-    backgroundColor: "#F57C00",
+    backgroundColor: "#069B18",
     width: 38,
     height: 36,
     borderRadius: 10,
@@ -966,7 +966,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   historyBtn: {
-    backgroundColor: "#7C2D12",
+    backgroundColor: "#F28C00",
     width: 38,
     height: 36,
     borderRadius: 10,
@@ -1008,7 +1008,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#7C2D12",
+    color: "#B85F00",
     marginBottom: 20,
   },
   historyList: {
@@ -1058,10 +1058,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0E7DE",
   },
   confirmBtn: {
-    backgroundColor: "#2E7D32",
+    backgroundColor: "#069B18",
   },
   confirmBtnPressed: {
-    backgroundColor: "#276A2A",
+    backgroundColor: "#057512",
   },
   modalBtnText: {
     fontSize: 16,
@@ -1082,7 +1082,7 @@ const styles = StyleSheet.create({
   lockTitle: {
     fontSize: 26,
     fontWeight: "800",
-    color: "#7C2D12",
+    color: "#B85F00",
   },
   lockSubtitle: {
     fontSize: 14,
@@ -1105,8 +1105,8 @@ const styles = StyleSheet.create({
     color: "#3A2A22",
   },
   lockInputError: {
-    borderColor: "#C62828",
+    borderColor: "#B85F00",
     backgroundColor: "#FDECEA",
-    color: "#C62828",
+    color: "#B85F00",
   },
 });

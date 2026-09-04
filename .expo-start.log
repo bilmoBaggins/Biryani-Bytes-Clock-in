@@ -9,3 +9,6 @@ Waiting on http://localhost:8081
 Logs for your project will appear below.
 Android Bundled 27694ms index.ts (2937 modules)
  LOG  Database initialized successfully
+Android Bundled 19258ms index.ts (1 module)
+ LOG  Database initialized successfully
+ ERROR  Text strings must be rendered within a <Text> component.

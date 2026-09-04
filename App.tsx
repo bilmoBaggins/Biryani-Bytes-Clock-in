@@ -8,6 +8,7 @@ import { initializeEmployees } from "./src/database/employees";
 import ClockScreen from "./src/screens/ClockScreen";
 import AdminScreen from "./src/screens/AdminScreen";
 import { initializeCloudSync, syncLocalDatabase } from "./src/cloud/sync";
+import BrandLogo from "./src/components/BrandLogo";
 
 const Tab = createBottomTabNavigator();
 
@@ -43,8 +44,9 @@ export default function App() {
   if (!isReady) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FBF3EC" }}>
-        <ActivityIndicator size="large" color="#C62828" />
-        <Text style={{ marginTop: 16, color: "#8A7A70", fontWeight: "600" }}>Loading Biryani Bytes...</Text>
+        <BrandLogo width={300} />
+        <ActivityIndicator size="large" color="#F28C00" />
+        <Text style={{ marginTop: 12, color: "#8A7A70", fontWeight: "600" }}>Loading...</Text>
       </View>
     );
   }
@@ -52,7 +54,7 @@ export default function App() {
   if (error) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24, backgroundColor: "#FBF3EC" }}>
-        <Text style={{ color: "#C62828", fontSize: 16, fontWeight: "700", textAlign: "center" }}>Something went wrong</Text>
+        <Text style={{ color: "#B85F00", fontSize: 16, fontWeight: "700", textAlign: "center" }}>Something went wrong</Text>
         <Text style={{ color: "#8A7A70", fontSize: 14, textAlign: "center", marginTop: 6 }}>{error}</Text>
       </View>
     );
@@ -64,19 +66,19 @@ export default function App() {
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={{
-            tabBarActiveTintColor: "#C62828",
-            tabBarInactiveTintColor: "#B0A6A0",
+            tabBarActiveTintColor: "#F28C00",
+            tabBarInactiveTintColor: "#85898C",
             tabBarLabelStyle: { fontSize: 14, fontWeight: "700", marginTop: 0 },
             tabBarItemStyle: { justifyContent: "center", alignItems: "center" },
             tabBarIconStyle: { display: "none", width: 0, height: 0, margin: 0 },
             tabBarStyle: {
               backgroundColor: "white",
-              borderTopColor: "#F0E7DE",
+              borderTopColor: "#E3DED7",
               height: 56,
               paddingBottom: 0,
               paddingTop: 0,
             },
-            headerStyle: { backgroundColor: "#7C2D12" },
+            headerStyle: { backgroundColor: "#85898C" },
             headerTintColor: "white",
             headerTitleStyle: { fontWeight: "700" },
           }}
