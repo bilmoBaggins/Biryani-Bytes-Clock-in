@@ -1,6 +1,7 @@
 import { getDatabase } from "./database";
 import { getEmployeeByName } from "./employees";
 import { Shift } from "../types";
+import { requestBackgroundSync } from "../cloud/sync";
 
 export async function clockInOut(employeeName: string): Promise<{
   status: "clockedIn" | "clockedOut";
@@ -13,8 +14,9 @@ export async function clockInOut(employeeName: string): Promise<{
     throw new Error(`Employee ${employeeName} not found`);
   }
 
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-  const now = new Date().toLocaleTimeString("en-GB", {
+  const nowDate = new Date();
+  const today = formatLocalDate(nowDate);
+  const now = nowDate.toLocaleTimeString("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -31,6 +33,7 @@ export async function clockInOut(employeeName: string): Promise<{
       `UPDATE employees SET is_clocked_in = 1 WHERE id = ?`,
       [employee.id]
     );
+    requestBackgroundSync();
     return {
       status: "clockedIn",
       message: `${employeeName} clocked in at ${now}`,
@@ -60,6 +63,7 @@ export async function clockInOut(employeeName: string): Promise<{
     `UPDATE employees SET is_clocked_in = 0 WHERE id = ?`,
     [employee.id]
   );
+  requestBackgroundSync();
 
   return {
     status: "clockedOut",
@@ -69,7 +73,7 @@ export async function clockInOut(employeeName: string): Promise<{
 
 export async function getTodayShifts(): Promise<Shift[]> {
   const db = getDatabase();
-  const today = new Date().toISOString().split("T")[0];
+  const today = formatLocalDate(new Date());
 
   const result = await db.getAllAsync<any>(
     `SELECT 
@@ -125,6 +129,13 @@ export async function getCurrentStatus(
   }
 
   return employee.isClockedIn ? "clockedIn" : "clockedOut";
+}
+
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function calculateHours(clockInTime: string, clockOutTime: string): number {

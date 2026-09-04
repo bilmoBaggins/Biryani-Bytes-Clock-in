@@ -7,6 +7,7 @@ import { initializeDatabase, closeDatabase } from "./src/database/database";
 import { initializeEmployees } from "./src/database/employees";
 import ClockScreen from "./src/screens/ClockScreen";
 import AdminScreen from "./src/screens/AdminScreen";
+import { initializeCloudSync, syncLocalDatabase } from "./src/cloud/sync";
 
 const Tab = createBottomTabNavigator();
 
@@ -19,6 +20,12 @@ export default function App() {
       try {
         await initializeDatabase();
         await initializeEmployees();
+        try {
+          await initializeCloudSync();
+          await syncLocalDatabase();
+        } catch (cloudError) {
+          console.warn("Cloud backup unavailable; continuing offline:", cloudError);
+        }
         setIsReady(true);
       } catch (err) {
         console.error("Failed to initialize app:", err);

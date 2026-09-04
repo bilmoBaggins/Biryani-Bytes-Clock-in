@@ -1,7 +1,9 @@
 import { getDatabase } from "./database";
 import { Employee } from "../types";
+import { requestBackgroundSync } from "../cloud/sync";
 
 const HOURLY_RATE = 12.0; // £12 per hour
+type EmployeeRow = Omit<Employee, "isClockedIn"> & { isClockedIn: number };
 
 function generateCode(): string {
   return Math.floor(1000 + Math.random() * 9000).toString();
@@ -58,18 +60,18 @@ export async function initializeEmployees() {
 
 export async function getEmployees(): Promise<Employee[]> {
   const db = getDatabase();
-  const rows = await db.getAllAsync<Employee & { isClockedIn: number }>(
+  const rows = (await db.getAllAsync(
     "SELECT id, name, hourly_rate as hourlyRate, code, is_clocked_in as isClockedIn FROM employees ORDER BY name"
-  );
+  )) as EmployeeRow[];
   return rows.map((row) => ({ ...row, isClockedIn: !!row.isClockedIn }));
 }
 
 export async function getEmployeeByName(name: string): Promise<Employee | null> {
   const db = getDatabase();
-  const row = await db.getFirstAsync<Employee & { isClockedIn: number }>(
+  const row = (await db.getFirstAsync(
     "SELECT id, name, hourly_rate as hourlyRate, code, is_clocked_in as isClockedIn FROM employees WHERE name = ?",
     [name]
-  );
+  )) as EmployeeRow | null;
   return row ? { ...row, isClockedIn: !!row.isClockedIn } : null;
 }
 
@@ -83,6 +85,7 @@ export async function addEmployee(
     "INSERT INTO employees (name, hourly_rate, code) VALUES (?, ?, ?)",
     [name, hourlyRate, code]
   );
+    requestBackgroundSync();
   return code;
 }
 
@@ -92,6 +95,7 @@ export async function updateHourlyRate(employeeId: number, hourlyRate: number) {
     hourlyRate,
     employeeId,
   ]);
+    requestBackgroundSync();
 }
 
 export async function updateEmployeeCode(employeeId: number, code: string) {
@@ -107,9 +111,18 @@ export async function updateEmployeeCode(employeeId: number, code: string) {
     code,
     employeeId,
   ]);
+  requestBackgroundSync();
 }
 
 export async function deleteEmployee(employeeId: number) {
   const db = getDatabase();
+  const openShift = await db.getFirstAsync(
+    "SELECT id FROM shifts WHERE employee_id = ? AND clock_out_time IS NULL LIMIT 1",
+    [employeeId]
+  );
+  if (openShift) {
+    throw new Error("This employee is currently clocked in. Clock them out before deleting them.");
+  }
   await db.runAsync("DELETE FROM employees WHERE id = ?", [employeeId]);
+  requestBackgroundSync();
 }

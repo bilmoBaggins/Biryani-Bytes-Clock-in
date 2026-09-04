@@ -17,8 +17,11 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { getAllMonthlyPayroll, getCurrentMonthRange } from "../utils/payroll";
 import { MonthlyPayroll } from "../types";
-import { getTodayShifts } from "../database/shifts";
+import { getShiftsByEmployee, getTodayShifts } from "../database/shifts";
 import { Shift, Employee } from "../types";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
+import { Clock3, Pencil, Trash2 } from "lucide-react-native";
 import {
   getEmployees,
   addEmployee,
@@ -43,6 +46,9 @@ export default function AdminScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentMonth, setCurrentMonth] = useState("");
+  const [historyEmployee, setHistoryEmployee] = useState<Employee | null>(null);
+  const [historyShifts, setHistoryShifts] = useState<Shift[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // Add employee modal
   const [showAddModal, setShowAddModal] = useState(false);
@@ -221,6 +227,67 @@ export default function AdminScreen() {
     );
   }
 
+  async function openHistory(emp: Employee) {
+    setHistoryEmployee(emp);
+    setHistoryShifts([]);
+    setHistoryLoading(true);
+    try {
+      setHistoryShifts(await getShiftsByEmployee(emp.name));
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to load shift history");
+      setHistoryEmployee(null);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
+
+  function closeHistory() {
+    setHistoryEmployee(null);
+    setHistoryShifts([]);
+  }
+
+  async function exportPayroll() {
+    if (monthlyData.length === 0) {
+      Alert.alert("No data", "There is no completed payroll data to export.");
+      return;
+    }
+
+    const escapeCsv = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const rows = [
+      ["Employee", "Month", "Hours", "Total Pay"],
+      ...monthlyData.map((record) => [
+        escapeCsv(record.employeeName),
+        record.month,
+        record.totalHours.toFixed(2),
+        record.totalPay.toFixed(2),
+      ]),
+      [
+        "Total",
+        currentMonth,
+        monthlyData.reduce((sum, record) => sum + record.totalHours, 0).toFixed(2),
+        monthlyData.reduce((sum, record) => sum + record.totalPay, 0).toFixed(2),
+      ],
+    ];
+    const csv = rows.map((row) => row.join(",")).join("\n");
+    const uri = `${FileSystem.documentDirectory}payroll-${currentMonth}.csv`;
+
+    try {
+      await FileSystem.writeAsStringAsync(uri, csv, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Export created", "CSV saved on this device, but sharing is unavailable.");
+        return;
+      }
+      await Sharing.shareAsync(uri, {
+        mimeType: "text/csv",
+        dialogTitle: `Export payroll for ${currentMonth}`,
+      });
+    } catch (error: any) {
+      Alert.alert("Export failed", error.message || "Failed to export payroll");
+    }
+  }
+
   function openEditModal(emp: Employee) {
     setEditingEmployee(emp);
     setEditRate(emp.hourlyRate.toString());
@@ -296,14 +363,26 @@ export default function AdminScreen() {
                   <Pressable
                     style={({ pressed }) => [styles.editBtn, pressed && styles.btnPressed]}
                     onPress={() => openEditModal(emp)}
+                    accessibilityLabel={`Edit ${emp.name}`}
+                    accessibilityRole="button"
                   >
-                    <Text style={styles.actionBtnText}>Edit</Text>
+                    <Pencil size={18} color="white" strokeWidth={2.5} />
+                  </Pressable>
+                  <Pressable
+                    style={({ pressed }) => [styles.historyBtn, pressed && styles.btnPressed]}
+                    onPress={() => openHistory(emp)}
+                    accessibilityLabel={`View history for ${emp.name}`}
+                    accessibilityRole="button"
+                  >
+                    <Clock3 size={18} color="white" strokeWidth={2.5} />
                   </Pressable>
                   <Pressable
                     style={({ pressed }) => [styles.deleteBtn, pressed && styles.btnPressed]}
                     onPress={() => handleDeleteEmployee(emp)}
+                    accessibilityLabel={`Delete ${emp.name}`}
+                    accessibilityRole="button"
                   >
-                    <Text style={styles.actionBtnText}>Delete</Text>
+                    <Trash2 size={18} color="white" strokeWidth={2.5} />
                   </Pressable>
                 </View>
               </View>
@@ -342,9 +421,15 @@ export default function AdminScreen() {
 
         {/* Monthly Payroll */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            Monthly Payroll ({currentMonth})
-          </Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Monthly Payroll ({currentMonth})</Text>
+            <Pressable
+              style={({ pressed }) => [styles.exportButton, pressed && styles.addButtonPressed]}
+              onPress={exportPayroll}
+            >
+              <Text style={styles.addButtonText}>Export CSV</Text>
+            </Pressable>
+          </View>
           {loading ? (
             <ActivityIndicator size="large" color="#C62828" />
           ) : monthlyData.length === 0 ? (
@@ -513,6 +598,48 @@ export default function AdminScreen() {
                 </Text>
               </Pressable>
             </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Shift History Modal */}
+      <Modal
+        visible={historyEmployee !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={closeHistory}
+      >
+        <Pressable style={styles.modalContainer} onPress={closeHistory}>
+          <Pressable style={styles.modalContent} onPress={() => {}}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>
+              {historyEmployee ? `${historyEmployee.name} - Shift History` : "Shift History"}
+            </Text>
+            {historyLoading ? (
+              <ActivityIndicator size="large" color="#C62828" />
+            ) : historyShifts.length === 0 ? (
+              <Text style={styles.noData}>No shifts recorded</Text>
+            ) : (
+              <ScrollView style={styles.historyList}>
+                {historyShifts.map((shift) => (
+                  <View key={shift.id} style={styles.historyRow}>
+                    <Text style={styles.historyDate}>{shift.date}</Text>
+                    <Text style={styles.detailText}>
+                      {shift.clockInTime} - {shift.clockOutTime || "Still clocked in"}
+                    </Text>
+                    {shift.hourlyPay !== null && (
+                      <Text style={styles.payText}>£{shift.hourlyPay.toFixed(2)}</Text>
+                    )}
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+            <Pressable
+              style={({ pressed }) => [styles.outlineButton, pressed && styles.outlineButtonPressed]}
+              onPress={closeHistory}
+            >
+              <Text style={styles.outlineButtonText}>Close</Text>
+            </Pressable>
           </Pressable>
         </Pressable>
       </Modal>
@@ -772,6 +899,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
   },
+  exportButton: {
+    backgroundColor: "#2E7D32",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
 
   // Employee Management Styles
   sectionHeader: {
@@ -826,7 +959,15 @@ const styles = StyleSheet.create({
   },
   editBtn: {
     backgroundColor: "#F57C00",
-    paddingHorizontal: 12,
+    width: 38,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  historyBtn: {
+    backgroundColor: "#7C2D12",
+    width: 38,
     height: 36,
     borderRadius: 10,
     justifyContent: "center",
@@ -834,7 +975,7 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     backgroundColor: "#C62828",
-    paddingHorizontal: 12,
+    width: 38,
     height: 36,
     borderRadius: 10,
     justifyContent: "center",
@@ -843,12 +984,6 @@ const styles = StyleSheet.create({
   btnPressed: {
     opacity: 0.75,
   },
-  actionBtnText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "white",
-  },
-
   // Modal Styles
   modalContainer: {
     flex: 1,
@@ -875,6 +1010,20 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#7C2D12",
     marginBottom: 20,
+  },
+  historyList: {
+    maxHeight: 320,
+  },
+  historyRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0E7DE",
+    paddingVertical: 10,
+  },
+  historyDate: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#3A2A22",
+    marginBottom: 4,
   },
   inputLabel: {
     fontSize: 13,

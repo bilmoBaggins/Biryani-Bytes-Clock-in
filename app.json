@@ -3,7 +3,6 @@
     "name": "BBytes",
     "slug": "BBytes",
     "version": "1.0.0",
-    "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,6 +17,11 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
-    }
+    },
+    "plugins": [
+      "expo-sharing",
+      "expo-sqlite",
+      "expo-status-bar"
+    ]
   }
 }

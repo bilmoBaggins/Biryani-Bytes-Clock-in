@@ -11,7 +11,13 @@ export async function getDailyPayRecord(
     `SELECT 
       SUM(CAST(hourly_pay AS REAL)) as totalPay,
       SUM(
-        (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 + 
+        CASE WHEN
+          (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 +
+            CAST((SUBSTR(clock_out_time, 4, 2)) AS INTEGER)) <
+          (CAST((SUBSTR(clock_in_time, 1, 2)) AS INTEGER) * 60 +
+            CAST((SUBSTR(clock_in_time, 4, 2)) AS INTEGER))
+        THEN 1440 ELSE 0 END +
+        (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 +
           CAST((SUBSTR(clock_out_time, 4, 2)) AS INTEGER)) -
         (CAST((SUBSTR(clock_in_time, 1, 2)) AS INTEGER) * 60 + 
           CAST((SUBSTR(clock_in_time, 4, 2)) AS INTEGER))
@@ -46,7 +52,13 @@ export async function getMonthlyPayroll(
       SUM(
         CASE 
           WHEN clock_out_time IS NOT NULL THEN
-            (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 + 
+            CASE WHEN
+              (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 +
+                CAST((SUBSTR(clock_out_time, 4, 2)) AS INTEGER)) <
+              (CAST((SUBSTR(clock_in_time, 1, 2)) AS INTEGER) * 60 +
+                CAST((SUBSTR(clock_in_time, 4, 2)) AS INTEGER))
+            THEN 1440 ELSE 0 END +
+            (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 +
              CAST((SUBSTR(clock_out_time, 4, 2)) AS INTEGER)) -
             (CAST((SUBSTR(clock_in_time, 1, 2)) AS INTEGER) * 60 + 
              CAST((SUBSTR(clock_in_time, 4, 2)) AS INTEGER))
@@ -83,7 +95,13 @@ export async function getAllMonthlyPayroll(
       SUM(
         CASE 
           WHEN clock_out_time IS NOT NULL THEN
-            ((CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 + 
+            (CASE WHEN
+              (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 +
+                CAST((SUBSTR(clock_out_time, 4, 2)) AS INTEGER)) <
+              (CAST((SUBSTR(clock_in_time, 1, 2)) AS INTEGER) * 60 +
+                CAST((SUBSTR(clock_in_time, 4, 2)) AS INTEGER))
+             THEN 1440 ELSE 0 END +
+             (CAST((SUBSTR(clock_out_time, 1, 2)) AS INTEGER) * 60 +
               CAST((SUBSTR(clock_out_time, 4, 2)) AS INTEGER)) -
              (CAST((SUBSTR(clock_in_time, 1, 2)) AS INTEGER) * 60 + 
               CAST((SUBSTR(clock_in_time, 4, 2)) AS INTEGER)))
